@@ -90,3 +90,82 @@ function validarPassword() {
   limpiarError("password");
   return true;
 }
+
+function validarConfirmar() {
+  const password  = document.querySelector("#password").value;
+  const confirmar = document.querySelector("#confirmar").value;
+  if (!confirmar) {
+    mostrarError("confirmar", "La confirmación es obligatoria.");
+    return false;
+  }
+  if (password !== confirmar) {
+    mostrarError("confirmar", "Las contraseñas no coinciden.");
+    return false;
+  }
+  limpiarError("confirmar");
+  return true;
+}
+
+const selectRol   = document.querySelector("#rol");
+const grupoEquipo = document.querySelector("#grupo-equipo");
+
+selectRol.addEventListener("change", () => {
+  const esLider = selectRol.value === "lider";
+  grupoEquipo.classList.toggle("oculto", !esLider);
+
+  // Estrategia A seleccionada: alternar el atributo required nativo
+  document.querySelector("#equipo").required = esLider;
+
+  if (!esLider) limpiarError("equipo");
+});
+
+// Estrategia A — alternar el atributo required nativo
+function validarEquipo() {
+  const campo = document.querySelector("#equipo");
+  if (!campo.required) return true;  // el campo no aplica si el rol no es Líder
+
+  if (campo.validity.valueMissing) {
+    mostrarError("equipo", "Indique el equipo a cargo para el rol de Líder.");
+    return false;
+  }
+  limpiarError("equipo");
+  return true;
+}
+
+function validarRol() {
+  const campo = document.querySelector("#rol");
+  if (campo.validity.valueMissing) {
+    mostrarError("rol", "Seleccione un rol.");
+    return false;
+  }
+  limpiarError("rol");
+  return true;
+}
+
+function validarHoras() {
+  const campo = document.querySelector("#horas");
+  if (campo.validity.valueMissing) {
+    mostrarError("horas", "Indique las horas disponibles por semana.");
+    return false;
+  }
+  if (campo.validity.rangeUnderflow) {
+    mostrarError("horas", `Debe disponer al menos de ${campo.min} horas semanales.`);
+    return false;
+  }
+  if (campo.validity.rangeOverflow) {
+    mostrarError("horas", `No puede superar las ${campo.max} horas semanales.`);
+    return false;
+  }
+  limpiarError("horas");
+  return true;
+}
+
+function validarTerminos() {
+  const campo = document.querySelector("#terminos");
+  if (!campo.checked) {
+    mostrarError("terminos", "Debe aceptar los términos para continuar.");
+    return false;
+  }
+  limpiarError("terminos");
+  return true;
+}

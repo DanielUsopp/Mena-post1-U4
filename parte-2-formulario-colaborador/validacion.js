@@ -169,3 +169,85 @@ function validarTerminos() {
   limpiarError("terminos");
   return true;
 }
+
+// ─── Validación en tiempo real ───────────────────────────────────────────
+document.querySelector("#nombre")   .addEventListener("blur", validarNombre);
+document.querySelector("#email")    .addEventListener("blur", validarEmail);
+document.querySelector("#username") .addEventListener("blur", validarUsername);
+document.querySelector("#password") .addEventListener("blur", validarPassword);
+document.querySelector("#confirmar").addEventListener("blur", validarConfirmar);
+document.querySelector("#rol")      .addEventListener("change", validarRol);
+document.querySelector("#equipo")   .addEventListener("blur", validarEquipo);
+document.querySelector("#horas")    .addEventListener("blur", validarHoras);
+document.querySelector("#terminos") .addEventListener("change", validarTerminos);
+
+// Limpiar error al comenzar a escribir la confirmación
+document.querySelector("#confirmar").addEventListener("input", () => {
+  if (document.querySelector("#confirmar").value) limpiarError("confirmar");
+});
+
+// ─── Manejo del envío ───────────────────────────────────────────────────
+const form = document.querySelector("#form-registro");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();  // Siempre prevenir el envío por defecto
+
+  // Ejecutar todas las validaciones
+  const resultados = [
+    validarNombre(),
+    validarEmail(),
+    validarUsername(),
+    validarPassword(),
+    validarConfirmar(),
+    validarRol(),
+    validarEquipo(),
+    validarHoras(),
+    validarTerminos(),
+  ];
+
+  const todoValido = resultados.every(r => r === true);
+
+  if (todoValido) {
+    // Mostrar mensaje de éxito
+    const mensajeExito = document.querySelector("#mensaje-exito");
+    mensajeExito.classList.remove("oculto");
+    mensajeExito.classList.add("visible");
+
+    // Limpiar formulario después de 2 segundos
+    setTimeout(() => {
+      form.reset();
+      limpiarTodo();
+      grupoEquipo.classList.add("oculto");
+      mensajeExito.classList.remove("visible");
+      mensajeExito.classList.add("oculto");
+    }, 2000);
+  } else {
+    // Enfocar el primer campo con error
+    const primerInvalido = form.querySelector(".invalido");
+    if (primerInvalido) primerInvalido.focus();
+  }
+});
+
+// ─── Indicador de fortaleza de contraseña ───────────────────────────────
+function evaluarFortaleza(valor) {
+  let puntos = 0;
+  if (valor.length >= 8)          puntos++;
+  if (/[A-Z]/.test(valor))        puntos++;
+  if (/[0-9]/.test(valor))        puntos++;
+  if (/[^A-Za-z0-9]/.test(valor)) puntos++;
+  const niveles = ["", "Débil", "Regular", "Buena", "Fuerte"];
+  const colores = ["", "#C62828", "#F57F17", "#1565C0", "#2E7D32"];
+  return { nivel: niveles[puntos], color: colores[puntos], puntos };
+}
+const campoPassword = document.querySelector("#password");
+campoPassword.addEventListener("input", () => {
+  const { nivel, color, puntos } = evaluarFortaleza(campoPassword.value);
+  let indicador = document.querySelector("#fortaleza");
+  if (!indicador) {
+    indicador = document.createElement("span");
+    indicador.id = "fortaleza";
+    campoPassword.insertAdjacentElement("afterend", indicador);
+  }
+  indicador.textContent = puntos > 0 ? `Contraseña: ${nivel}` : "";
+  indicador.style.color = color;
+});
